@@ -22,7 +22,7 @@ mongoose.connect(dbURI, (err) => {
     console.log('Could not connect to the database');
     throw err;
   }
-}); 
+});
 const redisURL = process.env.REDISCLOUD_URL || 'redis://default:Be1o3Ct0gM1zhg2EhjXhkcqpespBTa4Q@redis-15353.c99.us-east-1-4.ec2.cloud.redislabs.com:15353';
 
 const redisClient = redis.createClient({
@@ -33,7 +33,10 @@ redisClient.connect().catch(console.error);
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginEmbedderPolicy:false,
+  contentSecurityPolicy:false
+}));
 app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
 app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.use(compression());
@@ -55,8 +58,8 @@ app.set('view engine', 'handlebars');
 app.set('views', `${__dirname}/../views`);
 app.use(cookieParser());
 app.use(csrf());
-app.use((err, req, res,next) => {
-  if(err.code !== 'EBADCSRFTOKEN') return next(err);
+app.use((err, req, res, next) => {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err);
   console.log('Missing CSRF token!');
   return false;
 });
